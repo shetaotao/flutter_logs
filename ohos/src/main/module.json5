@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "flutter_logs",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}

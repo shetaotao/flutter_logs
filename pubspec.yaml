@@ -21,6 +21,8 @@ dev_dependencies:
 flutter:
   plugin:
     platforms:
+      ohos:
+        pluginClass: FlutterLogsPlugin
       android:
         package: com.flutter.logs.plogs.flutter_logs
         pluginClass: FlutterLogsPlugin

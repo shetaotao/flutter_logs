@@ -8,7 +8,7 @@ publish_to: 'none'
 
 environment:
   #sdk: ">=2.12.0-0 <3.0.0"
-  sdk: ">=3.4.1 <4.0.0"
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -23,7 +23,11 @@ dependencies:
   cupertino_icons: ^1.0.6
 
   # Path Provider
-  path_provider: ^2.0.6
+  # path_provider: ^2.0.6
+  path_provider:
+    git:
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+      path: "packages/path_provider/path_provider"
 
 dev_dependencies:
   flutter_test:
