@@ -46,7 +46,9 @@ class _MyAppState extends State<MyApp> {
         enabled: true);
 
     // [IMPORTANT] The first log line must never be called before 'FlutterLogs.initLogs'
-    FlutterLogs.logInfo(_tag, "setUpLogs", "setUpLogs: Setting up logs..");
+    FlutterLogs.logInfo(_tag, "initLogs", "initLogs: Initializing logs..");
+    logStatus =  "Logs initialized";
+    setState(() {});
 
     // Logs Exported Callback
     FlutterLogs.channel.setMethodCallHandler((call) async {
@@ -77,49 +79,65 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Flutter Logs'),
         ),
-        body: Center(
+        body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Center(
-                    child: Text(
+                Text(
                   logStatus,
                   maxLines: 10,
-                )),
-                SizedBox(
-                  height: 20,
+                  textAlign: TextAlign.center,
                 ),
+                SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
                     logData(isException: false);
                   },
-                  child: Text('Log Something', style: TextStyle(fontSize: 20)),
+                  child: Text('logThis()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    logData(isException: true);
+                    logInfoMessage();
                   },
-                  child: Text('Log Exception', style: TextStyle(fontSize: 20)),
+                  child: Text('logInfo()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    logWarnMessage();
+                  },
+                  child: Text('logWarn()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    logErrorMessage();
+                  },
+                  child: Text('logError()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    logErrorTraceMessage();
+                  },
+                  child: Text('logErrorTrace()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     logToFile();
                   },
-                  child: Text('Log To File', style: TextStyle(fontSize: 20)),
+                  child: Text('logToFile()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    printAllLogs();
+                    printLogs();
                   },
-                  child: Text('Print All Logs', style: TextStyle(fontSize: 20)),
+                  child: Text('printLogs()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     // Export and then get File Reference
-                    await exportAllLogs().then((value) async {
+                    await exportLogs().then((value) async {
                       Directory? externalDirectory;
 
                       if (Platform.isIOS) {
@@ -151,29 +169,54 @@ class _MyAppState extends State<MyApp> {
                     });
                   },
                   child:
-                      Text('Export All Logs', style: TextStyle(fontSize: 20)),
+                      Text('exportLogs()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     printFileLogs();
                   },
                   child:
-                      Text('Print File Logs', style: TextStyle(fontSize: 20)),
+                      Text('printFileLogForName()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     exportFileLogs();
                   },
                   child:
-                      Text('Export File Logs', style: TextStyle(fontSize: 20)),
+                      Text('exportFileLogForName()', style: TextStyle(fontSize: 20)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    FlutterLogs.clearLogs();
-                    setLogsStatus(status: "");
+                    exportAllFileLogs();
                   },
-                  child: Text('Clear Logs', style: TextStyle(fontSize: 20)),
-                )
+                  child: Text('exportAllFileLogs()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await FlutterLogs.clearLogs();
+                    setLogsStatus(status: "clearLogs() executed");
+                  },
+                  child: Text('clearLogs()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    doSetupForMQTT();
+                  },
+                  child: Text('initMQTT()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    doSetupForELKSchema();
+                  },
+                  child: Text('setMetaInfo()', style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    setDebugLevel();
+                  },
+                  child: Text('setDebugLevel()', style: TextStyle(fontSize: 20)),
+                ),
+                SizedBox(height: 40),
               ],
             ),
           ),
@@ -207,6 +250,7 @@ class _MyAppState extends State<MyApp> {
       longitude: "-76.0",
       labels: "",
     );
+     setLogsStatus(status: "Meta info set");
   }
 
   void doSetupForMQTT() async {
@@ -219,6 +263,45 @@ class _MyAppState extends State<MyApp> {
         writeLogsToLocalStorage: true,
         debug: true,
         initialDelaySecondsForPublishing: 10);
+    setLogsStatus(status: "init MQTT");
+  }
+
+  void setDebugLevel() async {
+    FlutterLogs.setDebugLevel(2);
+    setLogsStatus(status: "Debug level set to 2 (all messages)");
+  }
+
+  void exportAllFileLogs() async {
+    await FlutterLogs.exportAllFileLogs(decryptBeforeExporting: true);
+    setLogsStatus(status: "All file logs exported");
+  }
+
+  void logWarnMessage() async {
+    FlutterLogs.logWarn(_tag, "logWarnMessage", "This is a warning message");
+    setLogsStatus(status: "logWarn() executed");
+  }
+
+  void logInfoMessage() async {
+    FlutterLogs.logInfo(_tag, "logInfoMessage", "This is an info message");
+    setLogsStatus(status: "logInfo() executed");
+  }
+
+  void logErrorMessage() async {
+    FlutterLogs.logError(_tag, "logErrorMessage", "This is an error message");
+    setLogsStatus(status: "logError() executed");
+  }
+
+  void logErrorTraceMessage() async {
+    try {
+      var i = 100 ~/ 0;
+      print("$i");
+    } catch (e, stackTrace) {
+      if (e is Error) {
+        FlutterLogs.logErrorTrace(
+            _tag, "logErrorTraceMessage", "Error with trace", e);
+        setLogsStatus(status: "Error trace logged: ${e.stackTrace ?? stackTrace}");
+      }
+    }
   }
 
   void logData({required bool isException}) {
@@ -277,13 +360,13 @@ class _MyAppState extends State<MyApp> {
     setLogsStatus(status: logMessage);
   }
 
-  void printAllLogs() {
+  void printLogs() {
     FlutterLogs.printLogs(
         exportType: ExportType.ALL, decryptBeforeExporting: true);
     setLogsStatus(status: "All logs printed");
   }
 
-  Future<String> exportAllLogs() async {
+  Future<String> exportLogs() async {
     FlutterLogs.exportLogs(exportType: ExportType.ALL);
     return _completer.future as FutureOr<String>;
   }

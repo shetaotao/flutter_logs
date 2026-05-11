@@ -45,16 +45,20 @@ class _MyAppState extends State<MyApp> {
         isDebuggable: true,
         enabled: true);
 
+    // [IMPORTANT] The first log line must never be called before 'FlutterLogs.initLogs'
     FlutterLogs.logInfo(_tag, "setUpLogs", "setUpLogs: Setting up logs..");
 
+    // Logs Exported Callback
     FlutterLogs.channel.setMethodCallHandler((call) async {
       if (call.method == 'logsExported') {
+        // Contains file name of zip
         FlutterLogs.logInfo(
             _tag, "setUpLogs", "logsExported: ${call.arguments.toString()}");
 
         setLogsStatus(
             status: "logsExported: ${call.arguments.toString()}", append: true);
 
+        // Notify Future with value
         _completer.complete(call.arguments.toString());
       } else if (call.method == 'logsPrinted') {
         FlutterLogs.logInfo(
@@ -112,6 +116,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    // Export and then get File Reference
                     await exportAllLogs().then((value) async {
                       Directory? externalDirectory;
 
@@ -210,6 +215,45 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  void doSetupForELKSchema() async {
+    await FlutterLogs.setMetaInfo(
+      appId: "flutter_logs_example",
+      appName: "Flutter Logs Demo",
+      appVersion: "1.0",
+      language: "en-US",
+      deviceId: "00012",
+      environmentId: "7865",
+      environmentName: "dev",
+      organizationId: "5767",
+      organizationUnitId: "5767",
+      userId: "883023-2832-2323",
+      userName: "umair13adil",
+      userEmail: "m.umair.adil@gmail.com",
+      deviceSerial: "YJBKKSNKDNK676",
+      deviceBrand: "LG",
+      deviceName: "LG-Y08",
+      deviceManufacturer: "LG",
+      deviceModel: "989892BBN",
+      deviceSdkInt: "26",
+      deviceBatteryPercent: "27",
+      latitude: "55.0",
+      longitude: "-76.0",
+      labels: "",
+    );
+  }
+
+  void doSetupForMQTT() async {
+    await FlutterLogs.initMQTT(
+        topic: "",
+        brokerUrl: "",
+        //Add URL without schema
+        certificate: "assets/m2mqtt_ca.crt",
+        port: "8883",
+        writeLogsToLocalStorage: true,
+        debug: true,
+        initialDelaySecondsForPublishing: 10);
   }
 
   void initMQTT() async {
@@ -330,8 +374,9 @@ class _MyAppState extends State<MyApp> {
     FlutterLogs.logToFile(
         logFileName: _myLogFileName,
         overwrite: false,
+        //If set 'true' logger will append instead of overwriting
         logMessage: logMessage,
-        appendTimeStamp: true);
+        appendTimeStamp: true); //Add time stamp at the end of log message
     setLogsStatus(status: logMessage);
   }
 
